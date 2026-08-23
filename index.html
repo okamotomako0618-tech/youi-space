@@ -332,6 +332,21 @@ body{font-family:'Noto Sans JP',sans-serif;background:linear-gradient(160deg,#ff
 .kyc-lead{font-size:.84rem;color:var(--ink);font-weight:600;margin-bottom:12px;line-height:1.6}
 .kyc-lead b{color:var(--pink-d)}
 /* 書類の選択 */
+.kyc-doc-nfc{border-color:rgba(63,169,216,.35);background:rgba(63,169,216,.05)}
+.kyc-doc-nfc.on{border-color:var(--pink);background:var(--pink-l)}
+.kyc-fast{display:inline-block;font-size:.6rem;font-weight:800;color:#fff;background:#3fa9d8;
+  padding:2px 7px;border-radius:999px;margin-left:6px;vertical-align:middle}
+/* ICチップ読み取り */
+.kyc-nfc{display:flex;flex-direction:column;align-items:center;gap:10px;padding:30px 16px;
+  border-radius:18px;border:1.5px dashed rgba(63,169,216,.4);background:rgba(63,169,216,.05);
+  cursor:pointer;text-align:center}
+.kyc-nfc.done{border-style:solid;border-color:rgba(92,184,92,.5);background:rgba(92,184,92,.07)}
+.kyc-nfc-ring{width:84px;height:84px;border-radius:50%;border:3px solid rgba(63,169,216,.35);
+  display:flex;align-items:center;justify-content:center;color:#2b87b3;background:#fff;
+  animation:nfcPulse 1.8s ease-in-out infinite}
+.kyc-nfc.done .kyc-nfc-ring{border-color:rgba(92,184,92,.55);color:#3d9140;animation:none}
+.kyc-nfc-ring .ic{font-size:2rem}
+@keyframes nfcPulse{0%,100%{box-shadow:0 0 0 0 rgba(63,169,216,.28)}50%{box-shadow:0 0 0 12px rgba(63,169,216,0)}}
 .kyc-doc{display:flex;align-items:center;gap:12px;width:100%;padding:14px 13px;margin-bottom:9px;
   border-radius:15px;border:1.5px solid rgba(0,0,0,.07);background:#fff;font-family:inherit;
   cursor:pointer;text-align:left;transition:all .2s}
@@ -1326,9 +1341,14 @@ body.menu-open .rail{opacity:.12!important;pointer-events:none}
     <!-- STEP 1: 書類の選択 -->
     <div class="kyc-pane" id="kyc-1">
       <div class="kyc-lead">お手元にある書類を選んでください</div>
-      <button type="button" class="kyc-doc" onclick="kycPickDoc(this,'マイナンバーカード')">
+      <button type="button" class="kyc-doc kyc-doc-nfc" onclick="kycPickDoc(this,'マイナンバーカード','nfc')">
         <div class="kyc-doc-ico"><svg class="ic"><use href="#i-id-card"/></svg></div>
-        <div class="kyc-doc-body"><div class="kyc-doc-t">マイナンバーカード</div><div class="kyc-doc-s">おすすめ・1枚で完了します</div></div>
+        <div class="kyc-doc-body"><div class="kyc-doc-t">マイナンバーカード（ICチップを読み取る）<span class="kyc-fast">最速</span></div><div class="kyc-doc-s">スマホにかざすだけ。撮影不要で1分ほどで完了します</div></div>
+        <svg class="ic kyc-chev"><use href="#i-chevron-r"/></svg>
+      </button>
+      <button type="button" class="kyc-doc" onclick="kycPickDoc(this,'マイナンバーカード','photo')">
+        <div class="kyc-doc-ico"><svg class="ic"><use href="#i-id-card"/></svg></div>
+        <div class="kyc-doc-body"><div class="kyc-doc-t">マイナンバーカード（撮影する）</div><div class="kyc-doc-s">1枚で完了します</div></div>
         <svg class="ic kyc-chev"><use href="#i-chevron-r"/></svg>
       </button>
       <button type="button" class="kyc-doc" onclick="kycPickDoc(this,'運転免許証')">
@@ -1338,7 +1358,7 @@ body.menu-open .rail{opacity:.12!important;pointer-events:none}
       </button>
       <button type="button" class="kyc-doc" onclick="kycPickDoc(this,'パスポート')">
         <div class="kyc-doc-ico"><svg class="ic"><use href="#i-globe"/></svg></div>
-        <div class="kyc-doc-body"><div class="kyc-doc-t">パスポート</div><div class="kyc-doc-s">顔写真のページを撮影します</div></div>
+        <div class="kyc-doc-body"><div class="kyc-doc-t">パスポート</div><div class="kyc-doc-s">2020年2月以降発行のものは住所欄がないため、住所確認書類も必要です</div></div>
         <svg class="ic kyc-chev"><use href="#i-chevron-r"/></svg>
       </button>
       <button type="button" class="kyc-doc" onclick="kycPickDoc(this,'在留カード')">
@@ -1353,11 +1373,11 @@ body.menu-open .rail{opacity:.12!important;pointer-events:none}
       </button>
     </div>
 
-    <!-- STEP 2: 書類の撮影 -->
+    <!-- STEP 2: 書類の撮影／IC読み取り -->
     <div class="kyc-pane" id="kyc-2" style="display:none">
-      <div class="kyc-lead"><b id="kyc-doc-name">書類</b>を撮影してください</div>
+      <div class="kyc-lead" id="kyc-step2-lead"><b id="kyc-doc-name">書類</b>を撮影してください</div>
       <div id="kyc-shots"></div>
-      <div class="kyc-note">
+      <div class="kyc-note" id="kyc-step2-note">
         <svg class="ic"><use href="#i-info"/></svg>
         <div>四隅が全部入るように、明るい場所で撮影してください。文字がはっきり読めることを確認してください。</div>
       </div>
@@ -2697,7 +2717,7 @@ var KYC_LABELS=['書類を選ぶ','書類を撮影','顔写真','内容の確認
 var KYC_SHOTS={
   'マイナンバーカード':[['front','カードの表面']],
   '運転免許証':[['front','免許証の表面'],['back','免許証の裏面']],
-  'パスポート':[['front','顔写真のページ']],
+  'パスポート':[['front','顔写真のページ'],['addr','住所確認書類（住民票の写し・公共料金の領収書など、3ヶ月以内）']],
   '在留カード':[['front','カードの表面'],['back','カードの裏面']],
   '健康保険証':[['front','保険証の表面'],['addr','住所確認書類（公共料金の領収書など）']]
 };
@@ -2705,6 +2725,8 @@ function renderKycSteps(){
   var el=document.getElementById('kyc-steps'); if(!el) return;
   el.innerHTML=KYC_LABELS.map(function(l,i){
     var n=i+1, cls = n<KYC.step?'done':(n===KYC.step?'on':'');
+    if(n===2 && KYC.method==='nfc') l='IC読み取り';
+    if(n===3 && KYC.method==='nfc') cls = n<KYC.step?'done':cls; // NFCは顔写真ステップを自動でスキップ扱い
     return '<div class="kyc-st '+cls+'"><span class="kyc-st-n">'+(n<KYC.step?'✓':n)+'</span>'+
            '<span class="kyc-st-l">'+l+'</span></div>';
   }).join('');
@@ -2716,22 +2738,39 @@ function showKycPane(){
   }
   var next=document.getElementById('kyc-next'), later=document.getElementById('kyc-later');
   if(KYC.step===1){ next.textContent='次へ'; }
-  else if(KYC.step===2){ next.textContent='撮影できたら次へ'; }
+  else if(KYC.step===2){ next.textContent=(KYC.method==='nfc')?'読み取れたら次へ':'撮影できたら次へ'; }
   else if(KYC.step===3){ next.textContent='撮影できたら次へ'; }
   else if(KYC.step===4){ next.textContent='この内容で提出する'; }
   else { next.textContent='ホームに戻る'; }
   if(later) later.style.display=(KYC.step>=5?'none':'');
   renderKycSteps();
 }
-function kycPickDoc(el,name){
+function kycPickDoc(el,name,method){
   document.querySelectorAll('#kyc-1 .kyc-doc').forEach(function(b){b.classList.remove('on');});
   el.classList.add('on');
-  KYC.doc=name; KYC.shots={};
+  KYC.doc=name; KYC.shots={}; KYC.method=method||'photo'; KYC.nfcDone=false;
   var t=document.getElementById('kyc-doc-name'); if(t) t.textContent=name;
+  var lead=document.getElementById('kyc-step2-lead'), note=document.getElementById('kyc-step2-note');
+  if(KYC.method==='nfc'){
+    if(lead) lead.innerHTML='<b>'+escapeHtml(name)+'</b>のICチップを読み取ってください';
+    if(note) note.innerHTML='<svg class="ic"><use href="#i-info"/></svg><div>スマホの背面をカードの中央付近にかざしてください。読み取り中は動かさないようにしてください。</div>';
+  }else{
+    if(lead) lead.innerHTML='<b>'+escapeHtml(name)+'</b>を撮影してください';
+    if(note) note.innerHTML='<svg class="ic"><use href="#i-info"/></svg><div>四隅が全部入るように、明るい場所で撮影してください。文字がはっきり読めることを確認してください。</div>';
+  }
   renderKycShots();
 }
 function renderKycShots(){
   var el=document.getElementById('kyc-shots'); if(!el) return;
+  if(KYC.method==='nfc'){
+    el.innerHTML =
+      '<div class="kyc-nfc'+(KYC.nfcDone?' done':'')+'" id="kyc-nfc-zone" onclick="kycNfcRead()">'+
+      '<div class="kyc-nfc-ring"><svg class="ic"><use href="#'+(KYC.nfcDone?'i-check':'i-id-card')+'"/></svg></div>'+
+      '<div class="kyc-shot-t">'+(KYC.nfcDone?'読み取りが完了しました':'タップしてスマホをカードにかざす')+'</div>'+
+      '<div class="kyc-shot-s">'+(KYC.nfcDone?'氏名・生年月日・住所を取得しました':'マイナンバーカードの券面事項入力補助APを読み取ります')+'</div>'+
+      '</div>';
+    return;
+  }
   var list=KYC_SHOTS[KYC.doc]||[['front','書類']];
   el.innerHTML=list.map(function(s){
     var done=!!KYC.shots[s[0]];
@@ -2741,6 +2780,17 @@ function renderKycShots(){
       '<div class="kyc-shot-s">'+(done?'撮影しました。タップでやり直せます':'タップして撮影')+'</div></div>'+
     '</div>';
   }).join('');
+}
+/* ICチップ読み取り（デモでは読み取り済みとして記録し、氏名などを仮に埋める） */
+function kycNfcRead(){
+  KYC.nfcDone=!KYC.nfcDone;
+  renderKycShots();
+  if(KYC.nfcDone){
+    toast('ICチップを読み取りました');
+    KYC.selfie=true; // NFC本人確認は顔写真を撮影済み扱いにする（章立てはスキップ）
+  }else{
+    toast('読み取りをやり直します');
+  }
 }
 /* 撮影（デモでは撮影済みとして記録する） */
 function kycShoot(key,el){
@@ -2765,6 +2815,14 @@ function kycNext(){
     KYC.step=2; showKycPane(); return;
   }
   if(KYC.step===2){
+    if(KYC.method==='nfc'){
+      if(!KYC.nfcDone){ toast('ICチップを読み取ってください'); return; }
+      KYC.step=4; showKycPane();
+      var u0=getStoredUser()||{};
+      var n0=document.getElementById('kyc-name');
+      if(n0 && !n0.value) n0.value=u0.name||'';
+      return;
+    }
     var need=(KYC_SHOTS[KYC.doc]||[]).map(function(s){return s[0];});
     var missing=need.filter(function(k){return !KYC.shots[k];});
     if(missing.length){ toast('必要な書類をすべて撮影してください（残り'+missing.length+'枚）'); return; }
@@ -5362,7 +5420,7 @@ function openLegal(kind){
       legalSec('第1条（本サービスと実証運用）','本サービスは、地域の相互扶助を支える非営利の取り組みです。現在は<b>同意を得た限定参加者による実証運用中</b>であり、内容の変更・一時停止・終了があり得ます。')+
       legalSec('第2条（アカウント）','①登録情報は正確に入力してください　②アカウントはひとり1つ・本人のみ利用できます　③パスワードはご自身で管理してください')+
       legalSec('第3条（支援活動の性質）','本サービスでの支援は、利用者同士の合意にもとづく<b>無償の助け合い</b>です。運営はマッチングの場を提供するもので、個々の支援の当事者にはなりません。支援の実施にあたっては、お互いの安全と体調を最優先してください。')+
-      legalSec('第4条（禁止事項）','次の行為を禁止します。<br>・金銭の授受・貸し借り、物品の販売、報酬の要求<br>・宗教・政治・営業目的の勧誘<br>・出会い・交際を目的とする利用<br>・差別、誹謗中傷、嫌がらせ、つきまとい<br>・他人へのなりすまし、虚偽の投稿<br>・相手の個人情報を本人の同意なく集める・広める行為<br>・その他、法令や公序良俗に反する行為')+
+      legalSec('第4条（禁止事項）','次の行為を禁止します。<br>・金銭の授受・貸し借り、物品の販売、報酬の要求<br>・宗教・政治・営業目的の勧誘<br>・出会い・交際を目的とする利用<br>・差別、誹謗中傷、嫌がらせ、つきまとい<br>・他人へのなりすまし、虚偽の投稿<br>・相手の個人情報を本人の同意なく集める・広める行為<br>・反社会的勢力（暴力団等）に該当する方の利用、およびこれらの者への利益供与<br>・支援活動を通じて知り得た他人の個人情報や秘密を、第三者に開示・漏洩する行為（退会後も同様とします）<br>・その他、法令や公序良俗に反する行為')+
             legalSec('第5条（＆ポイント）','＆ポイントは感謝を見えるようにする仕組みであり、<b>金銭的価値・換金性はありません</b>。譲渡・売買はできず、実証運用の終了時に消滅することがあります。')+
       legalSec('第6条（本人確認・通報と利用停止）','本人確認は任意ですが、安心のため推奨します。通報があった場合、運営は事実関係を確認し、投稿の削除・利用停止などの措置をとることがあります。')+
       legalSec('第7条（免責）','利用者間のトラブルは当事者間で解決いただくことを原則とします。運営は誠実に対応しますが、法令で認められる範囲で、損害賠償の責任を負わないものとします。犯罪被害のおそれがあるときは、ためらわず警察（相談 #9110・緊急 110）へ連絡してください。')+
