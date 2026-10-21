@@ -566,6 +566,11 @@ input[type=checkbox]:active{transform:scale(1.15)}
 .home-sec-card.c-gold{background:rgba(255,184,0,.08);border-color:rgba(255,184,0,.22)}
 .home-sec-card.c-sage{background:rgba(92,184,92,.07);border-color:rgba(92,184,92,.2)}
 .home-sec-card.c-blush{background:rgba(255,138,92,.08);border-color:rgba(255,138,92,.22)}
+.diag-promo{display:flex;align-items:center;gap:12px;padding:2px 18px 14px}
+.diag-promo-ic{flex:none;width:42px;height:42px;border-radius:50%;background:linear-gradient(160deg,#f0457a,#ff6f91);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.1rem;box-shadow:0 4px 12px rgba(240,69,122,.3)}
+.diag-promo-h{font-size:.78rem;font-weight:700;color:var(--ink);line-height:1.5}
+.diag-promo-p{font-size:.68rem;color:var(--tl);margin-top:3px;line-height:1.5}
+.diag-promo-btn{margin:0 18px 18px;width:calc(100% - 36px)}
 .trend-list{padding:0 18px;display:flex;flex-direction:column;gap:8px}
 .trend-row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 13px;cursor:pointer;transition:all .2s}
 .trend-row:active{transform:scale(.99)}
@@ -1289,7 +1294,11 @@ body.menu-open .rail{opacity:.12!important;pointer-events:none}
 .diag-opt-check .ic{font-size:.62rem}
 .diag-start-btn[disabled]{opacity:.4;pointer-events:none}
 .diag-skip{text-align:center;margin-top:14px;font-size:.74rem;color:var(--ttl);text-decoration:underline;cursor:pointer}
-.diag-safety-box{background:rgba(255,110,20,.08);border:1px solid rgba(255,110,20,.3);border-radius:14px;padding:14px;font-size:.78rem;line-height:1.9;color:#7a3d06;display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+.diag-safety-box{background:rgba(255,110,20,.08);border:1px solid rgba(255,110,20,.3);border-radius:14px;padding:14px;font-size:.78rem;line-height:1.9;color:#7a3d06;display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.diag-safety-tier{padding:10px 12px;border-radius:10px;line-height:1.7}
+.diag-safety-tier b{display:block;margin-bottom:2px;font-size:.8rem}
+.diag-safety-tier.urgent{background:rgba(224,32,32,.1);border:1px solid rgba(224,32,32,.35);color:#9c1f1f}
+.diag-safety-tier.consult{background:rgba(255,255,255,.65);border:1px solid rgba(255,110,20,.25);color:#7a3d06}
 .diag-caution-note{background:rgba(255,184,0,.12);border:1px solid rgba(255,184,0,.35);border-radius:12px;padding:11px 13px;font-size:.74rem;color:#8f6a12;line-height:1.7;margin-bottom:16px}
 .diag-section{margin-bottom:22px}
 .diag-section-h{display:flex;align-items:center;gap:7px;font-size:.92rem;font-weight:700;color:var(--ink);margin-bottom:6px}
@@ -1767,6 +1776,20 @@ body.menu-open .rail{opacity:.12!important;pointer-events:none}
         </div>
         </div>
 
+        <div class="home-sec-card c-gold" id="sec-diag">
+          <div class="sec-head">
+            <div class="sec-title">今のわたしチェック</div>
+          </div>
+          <div class="diag-promo">
+            <div class="diag-promo-ic"><svg class="ic"><use href="#i-target"/></svg></div>
+            <div class="diag-promo-body">
+              <div class="diag-promo-h">タップで答えるだけで、今のあなたに合いそうな支援がわかります</div>
+              <div class="diag-promo-p">気になるものから、無理のない範囲で見てみてください。</div>
+            </div>
+          </div>
+          <button class="btn-primary diag-promo-btn" onclick="diagReset();navTo('diag')">診断をはじめる</button>
+        </div>
+
         <div style="padding:0 18px 26px">
           <button class="btn-secondary" onclick="switchMainTabByName('map')">マップで全体を見る</button>
         </div>
@@ -1907,8 +1930,8 @@ body.menu-open .rail{opacity:.12!important;pointer-events:none}
       <div id="msg-empty" style="display:none;padding:30px 20px;text-align:center;color:var(--tl);font-size:.85rem;line-height:1.9">まだメッセージがありません。<br>気になる投稿を開いて<br>「メッセージを送る」から会話を始めましょう。</div>
       <div id="conv-list"></div>
       <div id="msg-demo" class="demo-only">
-      <div class="msg-item" onclick="openChat('藤本 隆','recv','藤')">
-        <div class="avatar md ph ph-fujimoto">藤<span class="v"><svg class="ic" style="font-size:.6rem"><use href="#i-check"/></svg></span></div>
+      <div class="msg-item" onclick="openChat('鈴木 智子','recv','鈴')">
+        <div class="avatar md ph ph-miyata">鈴<span class="v"><svg class="ic" style="font-size:.6rem"><use href="#i-check"/></svg></span></div>
         <div class="mc-body">
           <div class="msg-row1"><div class="msg-name">鈴木 さん <span class="msg-unread">2</span></div><div class="msg-time">14:32</div></div>
           <div class="msg-preview">明日の14時に駅前で待ち合わせで大丈夫ですか？</div>
@@ -1998,7 +2021,7 @@ body.menu-open .rail{opacity:.12!important;pointer-events:none}
     <div id="notif-empty" style="display:none;padding:34px 20px;text-align:center;color:var(--tl);font-size:.85rem;line-height:1.9">新しいお知らせはありません。<br>メッセージが届いたり、マッチングが成立すると<br>ここに表示されます。</div>
     <div class="demo-only">
     <div class="notif-group-h">新着</div>
-    <div class="notif-item unread" onclick="openChat('藤本 隆','recv','藤')">
+    <div class="notif-item unread" onclick="openChat('鈴木 智子','recv','鈴')">
       <div class="notif-illust"><svg class="ic" style="width:18px;height:18px"><use href="#i-chat"/></svg></div>
       <div class="notif-body">
         <div class="notif-title">鈴木さんから新しいメッセージ</div>
@@ -2383,7 +2406,7 @@ body.menu-open .rail{opacity:.12!important;pointer-events:none}
     <div class="app-h-actions"><button class="icon-btn" onclick="toast('通報フォームを開きました')"><svg class="ic"><use href="#i-alert"/></svg></button></div>
   </div>
   <div class="uprof-hero">
-    <div class="avatar xl ph ph-fujimoto" style="margin:0 auto">藤<span class="v"><svg class="ic" style="font-size:.8rem"><use href="#i-check"/></svg></span></div>
+    <div class="avatar xl ph ph-miyata" style="margin:0 auto">鈴<span class="v"><svg class="ic" style="font-size:.8rem"><use href="#i-check"/></svg></span></div>
     <div class="prof-name">鈴木 智子 さん</div>
     <div class="prof-bio">熊本県 八代市・断水地域で高齢の母と避難生活中</div>
     <div class="prof-roles">
@@ -2409,7 +2432,7 @@ body.menu-open .rail{opacity:.12!important;pointer-events:none}
       <span class="uprof-skill">家事補助</span>
     </div>
   </div>
-  <div style="padding:0 18px 80px"><button class="btn-primary" onclick="openChat('藤本 隆','recv','藤')">メッセージを送る</button></div>
+  <div style="padding:0 18px 80px"><button class="btn-primary" onclick="openChat('鈴木 智子','recv','鈴')">メッセージを送る</button></div>
 </div>
 
 <!-- SETTINGS -->
@@ -2525,13 +2548,13 @@ body.menu-open .rail{opacity:.12!important;pointer-events:none}
 </div>
 
 <!-- セクションの縦インデックス（画面を跨いで常に使えるよう、各.screenの外に置く） -->
-<nav class="rail" id="reco-rail" aria-label="セクション">
+<nav class="rail" id="reco-rail" aria-label="セクション" style="display:none;opacity:0">
   <button class="rail-i on" data-t="sec-offer"   onclick="railTo(this,'sec-offer')"><i></i><span>支援</span></button>
   <button class="rail-i" data-t="sec-need"    onclick="railTo(this,'sec-need')"><i></i><span>要請</span></button>
   <button class="rail-i" data-t="sec-info" id="rail-info-btn" onclick="railTo(this,'sec-info')"><i></i><span>生活</span></button>
   <button class="rail-i" data-t="sec-shelter" id="rail-shelter-btn" onclick="railTo(this,'sec-shelter')"><i></i><span>避難</span></button>
   <button class="rail-i" data-t="sec-people"  onclick="railTo(this,'sec-people')"><i></i><span>人</span></button>
-  <button class="rail-i rail-i-diag" onclick="diagReset();navTo('diag')"><i></i><span>診断</span></button>
+  <button class="rail-i rail-i-diag" data-t="sec-diag" onclick="railTo(this,'sec-diag')"><i></i><span>診断</span></button>
 </nav>
 
 <!-- BOTTOM NAV -->
@@ -3292,7 +3315,7 @@ var RECO_INDEX=Object.keys(PEOPLE).map(function(name){
   return {kind:'prov',name:name,initial:p.ini,color:p.color,trust:p.trust,stars:p.stars,
     rev:p.rev,region:p.region,dist:p.dist,status:p.status,tags:p.tags,load:p.load};
 }).concat([
-  {kind:'need',name:'藤本 隆',initial:'鈴',color:'ph-fujimoto',score:92,stars:'5.0',meta:'スコア92',dist:'1.2km',desc:'断水地域で給水後の水を運んでほしい',detail:'断水が続いていて、給水後の水の運搬をお願いしたいです。',tags:['給水運搬']},
+  {kind:'need',name:'藤本 隆',initial:'藤',color:'ph-fujimoto',score:92,stars:'5.0',meta:'スコア92',dist:'1.2km',desc:'断水地域で給水後の水を運んでほしい',detail:'断水が続いていて、給水後の水の運搬をお願いしたいです。',tags:['給水運搬']},
   {kind:'need',name:'木村 節子',initial:'木',color:'ph-kimura',score:88,stars:'4.9',meta:'スコア88',dist:'3.4km',desc:'夫の薬を薬局まで取りに行ってほしい',detail:'断水地域に住んでいて、夫の薬を受け取りに行けず困っています。',tags:['薬受け取り代行']},
   {kind:'need',name:'林 早苗',initial:'林',color:'ph-hayashi',score:91,stars:'5.0',meta:'ひとり親',dist:'1.8km',desc:'避難所の片付け中に子どもを見ていてほしい',detail:'避難所での片付けの間、少しだけ子どもを見ていてほしいです。',tags:['子ども見守り']},
   {kind:'need',name:'大川 恵',initial:'佐',color:'ph-okawa',score:86,stars:'4.8',meta:'ひとり親',dist:'0.8km',desc:'物資の受け取りの間、子どもを見ていてほしい',detail:'物資の受け取りの間、15時に1時間だけ子どもを見ていてほしいです。',tags:['子ども見守り']},
@@ -6948,7 +6971,7 @@ function diagRenderBranch(box){
   box=box||document.getElementById('diag-body'); if(!box) return;
   var bq=DIAG_DISASTER_BRANCH;
   box.innerHTML='<div class="diag-back" onclick="diagPrev()"><svg class="ic" style="font-size:.85em"><use href="#i-back"/></svg>モード選択へ戻る</div>'+
-    '<div class="diag-q-num">さいしょの質問</div>'+
+    '<div class="diag-q-num">最初の質問</div>'+
     '<div class="diag-q-title">'+bq.q+'</div>'+
     '<div class="diag-opts">'+bq.opts.map(function(o,i){
       return '<button type="button" class="diag-opt" onclick="diagAnswerBranch('+i+')"><span class="diag-opt-ic"><svg class="ic"><use href="#'+o.ic+'"/></svg></span><span class="diag-opt-label">'+o.l+'</span></button>';
@@ -7048,7 +7071,8 @@ function diagRenderResult(box){
       '<h3>まず、安全の確保を優先してください</h3>'+
       '<p>回答の内容から、支援のマッチングより先に安全確認や専門的な対応が必要かもしれません。</p></div>'+
       '<div class="diag-safety-box">'+
-        '<div>・命に関わる危険を感じる場合は、ためらわず119番（消防・救急）や110番（警察）へ連絡してください</div>'+
+        '<div class="diag-safety-tier urgent"><b>今すぐ命に関わる危険があるとき</b>ためらわず119番（消防・救急）や110番（警察）へ連絡してください</div>'+
+        '<div class="diag-safety-tier consult"><b>差し迫った危険ではないが、不安なこと・相談したいことがあるとき</b>災害時の相談用フリーダイヤル 0120-602-110 も利用できます</div>'+
         '<div>・けがや体調不良がある場合は、応急手当や医療機関への相談を優先してください</div>'+
         '<div>・不安なときは、避難所の担当者や自治体の窓口にも相談できます</div>'+
       '</div>'+
