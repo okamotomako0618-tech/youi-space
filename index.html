@@ -7026,7 +7026,16 @@ function renderDemoMarkers(){
   var markers=isNormal?MAP_PEOPLE_NORMAL:MAP_PEOPLE_DISASTER;
   markers.forEach(function(m){
     var mk=L.marker([m.lat,m.lng],{icon:makeUserIcon(m.c,m.i,m.ph)}).addTo(mapInstance)
-      .on('click',function(){ openMatch(m.n,m.ph||m.c,m.t,m.d,m.s,m.m,m.sc,m.tags); });
+      .on('click',function(){
+        /* 支援者（c:'prov'）は「この件、対応します」という受援者向けの文言を出さず、
+           本人の対応可能な内容を見せるopenProviderで開く。受援者はこれまで通りopenMatch。 */
+        if(m.c==='prov' && PEOPLE[m.n]){
+          var p=PEOPLE[m.n];
+          openProvider(m.n,p.color,m.i,p.trust,p.stars,p.rev,p.region,p.dist,p.status,p.tags);
+        }else{
+          openMatch(m.n,m.ph||m.c,m.t,m.d,m.s,m.m,m.sc,m.tags);
+        }
+      });
     demoMarkers.push({mk:mk,tags:(m.tags||[]).join(' ')});
   });
   if(!window.__meMarker){
