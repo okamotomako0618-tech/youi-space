@@ -7697,21 +7697,21 @@ var DIAG_HELPER_Q=[
 ];
 /* ===== 状態 ===== */
 var diagPhase='intro', diagModeSel='disaster', diagTrack=null, diagQuestions=[];
-var diagStep=0, diagAnswers=[], diagSelected=[], diagGive={}, diagReceive={}, diagOtherText=[];
+var diagStep=0, diagAnswers=[], diagSelected=[], diagGive={}, diagReceive={}, diagOtherText=[], diagBranchOtherText='';
 var diagMeta={freq:null,range:null,hesitation:[],connection:null,freeText:''};
 var diagEmergency=false, diagCaution=false;
 function diagReset(){
   diagPhase='intro'; diagTrack=null; diagQuestions=[]; diagStep=0;
   diagAnswers=[]; diagSelected=[]; diagGive={}; diagReceive={}; diagOtherText=[];
   diagMeta={freq:null,range:null,hesitation:[],connection:null,freeText:''};
-  diagEmergency=false; diagCaution=false; diagBranchSel=null;
+  diagEmergency=false; diagCaution=false; diagBranchSel=null; diagBranchOtherText='';
   diagRender();
 }
 function diagPickMode(mode){
   diagModeSel=mode;
   diagAnswers=[]; diagSelected=[]; diagGive={}; diagReceive={}; diagOtherText=[];
   diagMeta={freq:null,range:null,hesitation:[],connection:null,freeText:''};
-  diagEmergency=false; diagCaution=false; diagBranchSel=null;
+  diagEmergency=false; diagCaution=false; diagBranchSel=null; diagBranchOtherText='';
   if(mode==='normal'){
     diagTrack=null; diagQuestions=DIAG_NORMAL_Q; diagPhase='question'; diagStep=0;
   }else{
@@ -7734,9 +7734,10 @@ function diagSelectBranch(i){
 function diagConfirmBranch(){
   if(diagBranchSel==null) return;
   var o=DIAG_DISASTER_BRANCH.opts[diagBranchSel];
+  if(o.l==='その他') diagMeta.branchOtherText=diagBranchOtherText||'';
   diagTrack=o.track;
   diagQuestions=diagTrackQuestions(diagTrack);
-  diagBranchSel=null;
+  diagBranchSel=null; diagBranchOtherText='';
   diagPhase='question'; diagStep=0;
   diagRender();
 }
@@ -7882,6 +7883,10 @@ function diagRenderIntro(box){
 function diagRenderBranch(box){
   box=box||document.getElementById('diag-body'); if(!box) return;
   var bq=DIAG_DISASTER_BRANCH;
+  var hasOtherB=(diagBranchSel!=null && bq.opts[diagBranchSel] && bq.opts[diagBranchSel].l==='その他');
+  var otherHtmlB=hasOtherB
+    ? '<textarea class="input diag-other-text" id="diag-branch-other-text" rows="2" maxlength="120" placeholder="具体的な内容を入力してください" oninput="diagBranchOtherText=this.value">'+escapeHtml(diagBranchOtherText||'')+'</textarea>'
+    : '';
   box.innerHTML='<div class="diag-back" onclick="diagPrev()"><svg class="ic" style="font-size:.85em"><use href="#i-back"/></svg>モード選択へ戻る</div>'+
     '<div class="diag-q-num">最初の質問</div>'+
     '<div class="diag-q-title">'+bq.q+'</div>'+
@@ -7889,6 +7894,7 @@ function diagRenderBranch(box){
       var on=(diagBranchSel===i);
       return '<button type="button" class="diag-opt'+(on?' on':'')+'" onclick="diagSelectBranch('+i+')"><span class="diag-opt-ic"><svg class="ic"><use href="#'+o.ic+'"/></svg></span><span class="diag-opt-label">'+o.l+'</span><span class="diag-opt-check"><svg class="ic"><use href="#i-check"/></svg></span></button>';
     }).join('')+'</div>'+
+    otherHtmlB+
     '<button type="button" class="btn-primary diag-start-btn" onclick="diagConfirmBranch()" '+(diagBranchSel==null?'disabled':'')+'>次へ</button>';
 }
 function diagRenderQuestion(){
